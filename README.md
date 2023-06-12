@@ -17,7 +17,24 @@ Below is a breakdown of the different steps involved for each stage of the
 project:
 
 ## Compiling the Dataset
-TBD
+
+### Downloading from YouTube
+To download from YouTube, use the youtube_downloader.sh script provided. First
+make sure you have Python, and youtube-dl installed.
+
+To install youtube-dl, you can use the command:
+
+```
+pip install youtube-dl
+```
+
+To run the code, make sure you have librosa installed. To install librosa, you
+can use the command:
+
+```
+pip install librosa
+```
+
 
 ## Building the Model
 TBD
