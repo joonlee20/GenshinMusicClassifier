@@ -42,5 +42,14 @@ TBD
 ## Training the Model
 TBD
 
+
+## Troubleshooting
+ERROR: ffprobe/avprobe and ffmpeg/avconv not found. Please install one.
+
+Download ffmpeg from https://www.gyan.dev/ffmpeg/builds/ and move the
+executables in the bin/ folder to the Python Scripts/ folder.
+https://stackoverflow.com/a/63127380
+
+
 ## Testing and Evaluating the Model
 TBD
