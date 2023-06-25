@@ -77,7 +77,7 @@ def loopToOneMinute(song):
 
 def splitIntoMinutes(song):
     secondsLength = librosa.get_duration(y=song, sr=SAMPLE_RATE)
-    minuteIntervals = [(i, i+ 60) for i in range(0, int(secondsLength / 60))]
+    minuteIntervals = [(i * 60 * SAMPLE_RATE, (i + 1) * 60 * SAMPLE_RATE) for i in range(0, int(secondsLength / 60))]
 
     i = 0
     for interval in minuteIntervals:
@@ -96,6 +96,7 @@ def splitIntoMinutes(song):
 
 def storeSong(song):
     # Store song into training data folder
+    print("Storing song of length: " + str(len(song)))
     truncatedSong = song[:NUM_SAMPLES_ONE_MIN]
 
     # Extract Mel Frequency Cepstral Coefficients
