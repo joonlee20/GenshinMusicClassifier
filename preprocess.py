@@ -37,9 +37,8 @@ def preprocess(dataset_path):
         # Make sure we are only looking at sub folders.
         if dirpath is not dataset_path:
             
-            semanticLabel = dirpath.split("\\")[-1]
-            DATA["mapping"].append(semanticLabel)
-            DATA["labels"].append(i-1)
+            label = dirpath.split("\\")[-1]
+            labelIndex = i - 1
 
             for file in filenames:
 
@@ -54,28 +53,28 @@ def preprocess(dataset_path):
 
                 # If longer than 1 min, send to splitIntoMinutes
                 if signalLenSeconds > 60:
-                    splitIntoMinutes(signal)
+                    splitIntoMinutes(signal, label, labelIndex)
                 # If less than 1 min, send to loopToOneMinute
                 elif signalLenSeconds < 60:
-                    loopToOneMinute(signal)
+                    loopToOneMinute(signal, label, labelIndex)
                 # The song is less than 61 seconds long, leave as is
                 else:
-                    storeSong(signal)
+                    storeSong(signal, label, labelIndex)
     
     # save MFCCs to json file
     with open(JSON_PATH, "w") as fp:
         json.dump(DATA, fp, indent=4)
 
-def loopToOneMinute(song):
+def loopToOneMinute(song, label, labelIndex):
     loopedSong = []
     while (len(loopedSong) < NUM_SAMPLES_ONE_MIN):
         loopedSong.append(song)
 
     print("Looped Song length: " + str(len(loopedSong)))
 
-    storeSong(loopedSong)
+    storeSong(loopedSong, label, labelIndex)
 
-def splitIntoMinutes(song):
+def splitIntoMinutes(song, label, labelIndex):
     secondsLength = librosa.get_duration(y=song, sr=SAMPLE_RATE)
     minuteIntervals = [(i * NUM_SAMPLES_ONE_MIN, (i + 1) * NUM_SAMPLES_ONE_MIN) for i in range(0, int(secondsLength / 60))]
 
@@ -84,7 +83,7 @@ def splitIntoMinutes(song):
         print("Storing Minute " + str(i) + " of song.")
         # Get data for the relevant interval
         intervalSong = song[interval[0]:interval[1]]
-        storeSong(intervalSong)
+        storeSong(intervalSong, label, labelIndex)
         i += 1
 
     lastSong = song[int(secondsLength / 60):int(secondsLength) % 60]
@@ -92,12 +91,15 @@ def splitIntoMinutes(song):
     # Only create a new looped song if the remaining audio data is significant
     # which we define here to be greater than 10 seconds long.
     if (len(lastSong) > SAMPLE_RATE * 10):
-        loopToOneMinute(lastSong)
+        loopToOneMinute(lastSong, label, labelIndex)
 
-def storeSong(song):
+def storeSong(song, label, labelIndex):
     # Store song into training data folder
     print("Storing song of length: " + str(len(song)))
     truncatedSong = song[:NUM_SAMPLES_ONE_MIN]
+
+    DATA["mapping"].append(label)
+    DATA["labels"].append(labelIndex)
 
     # Extract Mel Frequency Cepstral Coefficients
     mfcc = librosa.feature.mfcc(y=truncatedSong, sr=SAMPLE_RATE, n_mfcc=13, n_fft=2048, hop_length=512)
