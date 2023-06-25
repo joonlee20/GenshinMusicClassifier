@@ -77,7 +77,7 @@ def loopToOneMinute(song):
 
 def splitIntoMinutes(song):
     secondsLength = librosa.get_duration(y=song, sr=SAMPLE_RATE)
-    minuteIntervals = [(i * 60 * SAMPLE_RATE, (i + 1) * 60 * SAMPLE_RATE) for i in range(0, int(secondsLength / 60))]
+    minuteIntervals = [(i * NUM_SAMPLES_ONE_MIN, (i + 1) * NUM_SAMPLES_ONE_MIN) for i in range(0, int(secondsLength / 60))]
 
     i = 0
     for interval in minuteIntervals:
