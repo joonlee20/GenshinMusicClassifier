@@ -1,6 +1,6 @@
-from asyncore import loop
 import os
 import librosa
+import json
 
 # This file standardizes the set of audio data by making them all exactly one
 # minute long. If the file is:
@@ -13,7 +13,8 @@ import librosa
 
 # Run with
 # `python preprocess.py`
-# Modified from
+# 
+# Based off of
 # https://github.com/musikalkemist/DeepLearningForAudioWithPython/blob/master/12-%20Music%20genre%20classification%3A%20Preparing%20the%20dataset/code/extract_data.py
 # 
 # Youtube course video
@@ -22,6 +23,12 @@ import librosa
 DATASET_PATH = ""
 SAMPLE_RATE = 22050
 NUM_SAMPLES_ONE_MIN = SAMPLE_RATE * 60
+JSON_PATH = ""
+DATA = {
+        "mapping": [],
+        "labels": [],
+        "mfcc": []
+    }
 
 def preprocess(dataset_path):
     # Walk through folders in the directory
@@ -29,27 +36,35 @@ def preprocess(dataset_path):
         
         # Make sure we are only looking at sub folders.
         if dirpath is not dataset_path:
+            
+            semanticLabel = dirpath.split("\\")[-1]
+            DATA["mapping"].append(semanticLabel)
+            DATA["labels"].append(i-1)
 
             for file in filenames:
 
-                file_path = os.path.join(dirpath, file)
-                signal, _ = librosa.load(file_path, sr=SAMPLE_RATE)
-                print(file_path)
+                filePath = os.path.join(dirpath, file)
+                signal, _ = librosa.load(filePath, sr=SAMPLE_RATE)
+                print(filePath)
                 # print("Signal: " + str(signal[:10]))
 
                 # Figure out length
-                signal, _ = librosa.load(file_path, sr=SAMPLE_RATE)
-                signal_len_seconds = int(librosa.get_duration(y=signal, sr=SAMPLE_RATE))
+                signal, _ = librosa.load(filePath, sr=SAMPLE_RATE)
+                signalLenSeconds = int(librosa.get_duration(y=signal, sr=SAMPLE_RATE))
 
                 # If longer than 1 min, send to splitIntoMinutes
-                if signal_len_seconds > 60:
+                if signalLenSeconds > 60:
                     splitIntoMinutes(signal)
                 # If less than 1 min, send to loopToOneMinute
-                elif signal_len_seconds < 60:
+                elif signalLenSeconds < 60:
                     loopToOneMinute(signal)
                 # The song is less than 61 seconds long, leave as is
                 else:
                     storeSong(signal)
+    
+    # save MFCCs to json file
+    with open(JSON_PATH, "w") as fp:
+        json.dump(DATA, fp, indent=4)
 
 def loopToOneMinute(song):
     loopedSong = []
@@ -81,9 +96,24 @@ def splitIntoMinutes(song):
 
 def storeSong(song):
     # Store song into training data folder
-    truncated_song = song[:NUM_SAMPLES_ONE_MIN]
-    var = 0
+    truncatedSong = song[:NUM_SAMPLES_ONE_MIN]
+
+    # Extract Mel Frequency Cepstral Coefficients
+    mfcc = librosa.feature.mfcc(y=truncatedSong, sr=SAMPLE_RATE, n_mfcc=13, n_fft=2048, hop_length=512)
+    print("MFCC length: " + str(len(mfcc.tolist()[0])))
+    DATA["mfcc"].append(mfcc.tolist())
+
 
 if __name__ == "__main__":
     print("Running program")
+
+    print("Clearing data")
+    DATA = {
+        "mapping": [],
+        "labels": [],
+        "mfcc": []
+    }
+
+    print("Starting preprocessing")
     preprocess(DATASET_PATH)
+    print("Finished preprocessing")
