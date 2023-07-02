@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # Youtube course video
 # https://youtu.be/dOG-HxpbMSw
 
-# path to json file that stores MFCCs and genre labels for each processed segment
+# path to json file that stores MFCCs and genre labels for each processed segmentgit a
 DATA_PATH = ""
 
 def load_data(data_path):
