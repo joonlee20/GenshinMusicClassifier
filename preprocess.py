@@ -3,6 +3,7 @@ import librosa
 import json
 import numpy as np
 import random
+import filepaths
 
 # This file standardizes the set of audio data by making them all exactly ten
 # seconds long. If the file is:
@@ -19,11 +20,11 @@ import random
 # Youtube course video
 # https://youtu.be/szyGiObZymo
 
-DATASET_PATH = ""
+DATASET_PATH = filepaths.RAW_DATA_PATH
 SAMPLE_RATE = 22050 # per second
 DATA_WINDOW = 10 # seconds
 NUM_SAMPLES_ONE_WINDOW = SAMPLE_RATE * DATA_WINDOW
-JSON_PATH = ""
+JSON_PATH = filepaths.DATASET_PATH
 DATA = {
         "mapping": [],
         "labels": [],

@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import tensorflow.keras as keras
 import matplotlib.pyplot as plt
+import filepaths
 
 # Code taken from
 # https://github.com/musikalkemist/DeepLearningForAudioWithPython/blob/master/16-%20How%20to%20implement%20a%20CNN%20for%20music%20genre%20classification/code/cnn_genre_classifier.py
@@ -10,8 +11,8 @@ import matplotlib.pyplot as plt
 # Youtube course video
 # https://youtu.be/dOG-HxpbMSw
 
-# path to json file that stores MFCCs and genre labels for each processed segmentgit a
-DATA_PATH = ""
+# path to json file that stores MFCCs and genre labels for each processed segment
+DATA_PATH = filepaths.DATASET_PATH
 
 def load_data(data_path):
     """Loads training dataset from json file.
@@ -146,3 +147,5 @@ if __name__ == "__main__":
     # evaluate model on test set
     test_loss, test_acc = model.evaluate(X_test, y_test, verbose=2)
     print('\nTest accuracy:', test_acc)
+
+    model.save(filepaths.MODELS_PATH + "\\CNN")

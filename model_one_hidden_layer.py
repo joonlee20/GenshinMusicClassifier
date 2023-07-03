@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 import tensorflow as tf
 import tensorflow.keras as keras
 import matplotlib.pyplot as plt
+import filepaths
 
 # Modified from
 # https://github.com/musikalkemist/DeepLearningForAudioWithPython/blob/master/14-%20Solving%20overfitting%20in%20neural%20networks/code/solving_overfitting.py
@@ -12,7 +13,7 @@ import matplotlib.pyplot as plt
 # https://youtu.be/Gf5DO6br0ts
 
 # path to json file that stores MFCCs and genre labels for each processed segment
-DATA_PATH = ""
+DATA_PATH = filepaths.DATASET_PATH
 
 def load_data(data_path):
     """Loads training dataset from json file.
@@ -99,3 +100,5 @@ if __name__ == "__main__":
 
     # plot accuracy and error as a function of the epochs
     plot_history(history)
+
+    model.save(filepaths.MODELS_PATH + "\\NN_OneHiddenLayer")
