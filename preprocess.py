@@ -1,9 +1,10 @@
-import os
-import librosa
-import json
-import numpy as np
-import random
 import filepaths
+import json
+import librosa
+import numpy as np
+import os
+import random
+
 
 # This file standardizes the set of audio data by making them all exactly ten
 # seconds long. If the file is:
@@ -42,93 +43,92 @@ LABEL_WEIGHT_DICT = {
         "Enkanomiya": 6,
         "Liyue": 1,
         "Ocean": 6,
-        "SumeruRainforest": 1
+        "SumeruRainforest": 1,
+        "Temp": 1
     }
 
-def preprocess(dataset_path):
+def preprocess(dataset_path, json_path):
     # Walk through folders in the directory
-    for i, (dirpath, dirnames, filenames) in enumerate(os.walk(dataset_path)):
+    for i, (dir_path, dir_names, file_names) in enumerate(os.walk(dataset_path)):
         
         # Make sure we are only looking at sub folders.
-        if dirpath is not dataset_path:
+        if dir_path is not dataset_path:
             
-            label = dirpath.split("\\")[-1]
-            labelIndex = i - 1
+            label = dir_path.split("\\")[-1]
+            label_index = i - 1
 
             # Bootstrap the data since the number of songs we have from each
             # game area is not the same
-            bootstrappedFileNames = []
-            lenFilenames = len(filenames)
-            while len(bootstrappedFileNames) < lenFilenames * LABEL_WEIGHT_DICT[label]:
-                bootstrappedFileNames.append(filenames[random.randrange(lenFilenames)])
+            bootstrapped_file_names = []
+            len_file_names = len(file_names)
+            while len(bootstrapped_file_names) < len_file_names * LABEL_WEIGHT_DICT[label]:
+                bootstrapped_file_names.append(file_names[random.randrange(len_file_names)])
 
-            for file in filenames:
+            for file in file_names:
 
-                filePath = os.path.join(dirpath, file)
-                signal, _ = librosa.load(filePath, sr=SAMPLE_RATE)
-                print(filePath)
-                # print("Signal: " + str(signal[:10]))
+                file_path = os.path.join(dir_path, file)
+                signal, _ = librosa.load(file_path, sr=SAMPLE_RATE)
+                print(file_path)
 
                 # Figure out length
-                signal, _ = librosa.load(filePath, sr=SAMPLE_RATE)
-                signalLenSeconds = int(librosa.get_duration(y=signal, sr=SAMPLE_RATE))
+                signal, _ = librosa.load(file_path, sr=SAMPLE_RATE)
+                signal_len_seconds = int(librosa.get_duration(y=signal, sr=SAMPLE_RATE))
 
                 for j in range(LABEL_WEIGHT_DICT[label]):
                     # If longer than 1 window, send to splitIntoMinutes
-                    if signalLenSeconds > DATA_WINDOW:
-                        splitIntoWindows(signal, label, labelIndex)
+                    if signal_len_seconds > DATA_WINDOW:
+                        split_into_segments(signal, label, label_index)
                     # If less than 1 min, send to loopToOneMinute
-                    elif signalLenSeconds < DATA_WINDOW:
-                        loopToOneWindow(signal, label, labelIndex)
+                    elif signal_len_seconds < DATA_WINDOW:
+                        loop_to_one_segment(signal, label, label_index)
                     # The song is less than 61 seconds long, leave as is
                     else:
-                        storeSong(signal, label, labelIndex)
+                        store_song(signal, label, label_index)
     
     # save MFCCs to json file
-    with open(JSON_PATH, "w") as fp:
+    with open(json_path, "w") as fp:
         json.dump(DATA, fp, indent=4)
 
-def loopToOneWindow(song, label, labelIndex):
-    loopedSong = []
-    while (len(loopedSong) < NUM_SAMPLES_ONE_WINDOW):
-        loopedSong.extend(song)
+def loop_to_one_segment(song, label, label_index):
+    looped_song = []
+    while (len(looped_song) < NUM_SAMPLES_ONE_WINDOW):
+        looped_song.extend(song)
 
-    storeSong(np.array(loopedSong), label, labelIndex)
+    store_song(np.array(looped_song), label, label_index)
 
-def splitIntoWindows(song, label, labelIndex):
-    secondsLength = librosa.get_duration(y=song, sr=SAMPLE_RATE)
-    segmentIntervals = [(i * NUM_SAMPLES_ONE_WINDOW, (i + 1) * NUM_SAMPLES_ONE_WINDOW) for i in range(0, int(secondsLength / DATA_WINDOW))]
+def split_into_segments(song, label, label_index):
+    seconds_length = librosa.get_duration(y=song, sr=SAMPLE_RATE)
+    segment_intervals = [(i * NUM_SAMPLES_ONE_WINDOW, (i + 1) * NUM_SAMPLES_ONE_WINDOW) for i in range(0, int(seconds_length / DATA_WINDOW))]
 
     i = 0
-    for interval in segmentIntervals:
+    for interval in segment_intervals:
         print("Storing Segment " + str(i) + " of song.")
 
         # Get data for the relevant interval
         intervalSong = song[interval[0]:interval[1]]
 
-        storeSong(intervalSong, label, labelIndex)
+        store_song(intervalSong, label, label_index)
         i += 1
 
-    lastSong = song[int(secondsLength / DATA_WINDOW):int(secondsLength) % DATA_WINDOW]
+    last_song = song[int(seconds_length / DATA_WINDOW):int(seconds_length) % DATA_WINDOW]
 
     # Only create a new looped song if the remaining audio data is significant
     # which we define here to be greater than 20% of the data window size.
-    if (len(lastSong) > SAMPLE_RATE * DATA_WINDOW / 5):
-        loopToOneWindow(lastSong, label, labelIndex)
+    if (len(last_song) > SAMPLE_RATE * DATA_WINDOW / 5):
+        loop_to_one_segment(last_song, label, label_index)
 
-def storeSong(song, label, labelIndex):
+def store_song(song, label, label_index):
     # Store song into training data folder
     print("Storing song of length: " + str(len(song)))
-    truncatedSong = song[:NUM_SAMPLES_ONE_WINDOW]
+    truncated_song = song[:NUM_SAMPLES_ONE_WINDOW]
 
     DATA["mapping"].append(label)
-    DATA["labels"].append(labelIndex)
+    DATA["labels"].append(label_index)
 
     # Extract Mel Frequency Cepstral Coefficients
-    mfcc = librosa.feature.mfcc(y=truncatedSong, sr=SAMPLE_RATE, n_mfcc=13, n_fft=2048, hop_length=512)
+    mfcc = librosa.feature.mfcc(y=truncated_song, sr=SAMPLE_RATE, n_mfcc=13, n_fft=2048, hop_length=512)
 
     DATA["mfcc"].append(mfcc.tolist())
-
 
 if __name__ == "__main__":
     print("Running program")
@@ -141,5 +141,5 @@ if __name__ == "__main__":
     }
 
     print("Starting preprocessing")
-    preprocess(DATASET_PATH)
+    preprocess(DATASET_PATH, JSON_PATH)
     print("Finished preprocessing")

@@ -1,9 +1,10 @@
+import filepaths
 import json
+import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 import tensorflow.keras as keras
-import matplotlib.pyplot as plt
-import filepaths
+
 
 # Code taken from
 # https://github.com/musikalkemist/DeepLearningForAudioWithPython/blob/master/16-%20How%20to%20implement%20a%20CNN%20for%20music%20genre%20classification/code/cnn_genre_classifier.py

@@ -1,10 +1,11 @@
+import filepaths
 import json
+import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 import tensorflow.keras as keras
-import matplotlib.pyplot as plt
-import filepaths
+
 
 # Modified from
 # https://github.com/musikalkemist/DeepLearningForAudioWithPython/blob/master/14-%20Solving%20overfitting%20in%20neural%20networks/code/solving_overfitting.py

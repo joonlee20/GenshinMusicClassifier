@@ -1,11 +1,10 @@
-from pyexpat import model
-from tensorflow import keras
-import subprocess
-import librosa
 import filepaths
-import preprocess
-import numpy as np
 import json
+import numpy as np
+import preprocess
+import subprocess
+from tensorflow import keras
+
 
 MODEL_PATH = filepaths.MODELS_PATH + "\\CNN"
 TEMP_DATA_PATH = ".\\TempMusicData"
