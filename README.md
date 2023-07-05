@@ -78,7 +78,10 @@ executables in the bin/ folder to the Python Scripts/ folder.
 https://stackoverflow.com/a/63127380
 
 ## Prediction
-Stretch goal
+For the prediction workflow, I have written a script to download the audio data
+from Youtube if the user copies and pastes a Youtube link. The file then loads
+the saved CNN model and outputs predictions for what region it thinks each 10
+second long segment of the song belongs to.
 
 ## Generate New Songs for Specific Areas
 Stretch goal
